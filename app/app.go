@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
+	"github.com/sujithps/ticket-booking-system/contract"
+	"github.com/sujithps/ticket-booking-system/model"
 	"net/http"
-	"time"
 )
 
 func StartServer() {
@@ -24,41 +25,14 @@ func pingHandler() func(context *gin.Context) {
 	}
 }
 
-type Catalog struct {
-	Id   int    `json:"id"`
-	Name string `json:"name"`
-}
-
-type Ticket struct {
-	Id      int     `json:"id"`
-	Catalog Catalog `json:"catalog"`
-	Slot    Slot    `json:"slot"`
-}
-
-type Slot struct {
-	Id   int       `json:"id"`
-	Date time.Time `json:"date"`
-}
-
-type BookingResponse struct {
-	Success bool     `json:"success"`
-	Errors  []string `json:"errors"`
-	Data    []Ticket `json:"data"`
-}
-
-type BookingRequest struct {
-	Catalog Catalog `json:"catalog"`
-	Slot    Slot    `json:"slot"`
-}
-
 func bookTicketHandler() func(context *gin.Context) {
 	return func(context *gin.Context) {
 		fmt.Println("Ticket Booked")
-		var bookingRequest BookingRequest
+		var bookingRequest contract.BookingRequest
 
 		if err := context.ShouldBindBodyWith(&bookingRequest, binding.JSON); err != nil {
 			fmt.Printf("Received Error %+v ", err)
-			context.JSON(http.StatusCreated, BookingResponse{
+			context.JSON(http.StatusCreated, contract.BookingResponse{
 				Success: false,
 				Errors:  []string{"Invalid request body!!"},
 				Data:    nil,
@@ -66,16 +40,16 @@ func bookTicketHandler() func(context *gin.Context) {
 			return
 		}
 
-		ticket := Ticket{
+		ticket := model.Ticket{
 			Id:      0,
 			Catalog: bookingRequest.Catalog,
 			Slot:    bookingRequest.Slot,
 		}
 
-		context.JSON(http.StatusCreated, BookingResponse{
+		context.JSON(http.StatusCreated, contract.BookingResponse{
 			Success: true,
 			Errors:  []string{},
-			Data: []Ticket{
+			Data: []model.Ticket{
 				ticket,
 			},
 		})
