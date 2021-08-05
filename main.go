@@ -1,25 +1,20 @@
 package main
 
 import (
-  "flag"
-  "fmt"
+	"flag"
+	"github.com/sujithps/ticket-booking-system/app"
+	"github.com/sujithps/ticket-booking-system/db"
 )
+
 func main() {
-  migrate := flag.Bool("migrate", false, "To run migrate")
-  flag.Parse()
+	migrate := flag.Bool("migrate", false, "To run migrate")
+	flag.Parse()
 
-  if *migrate {
-    doMigrate()
-    return
-  }
+	if *migrate {
+		db.RunMigrations()
+		return
+	}
 
-  doStartServer()
+	app.StartServer()
 }
 
-func doStartServer() {
-  fmt.Println("Start Server..")
-}
-
-func doMigrate() {
- fmt.Println("Run Migration")
-}
