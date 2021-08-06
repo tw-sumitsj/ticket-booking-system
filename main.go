@@ -11,6 +11,7 @@ func main() {
 	migrate := flag.Bool("migrate", false, "To run migrate")
 	rollback := flag.Bool("rollback", false, "To rollback migration")
 	forceFixDirtyVersion := flag.Bool("force_fix_dirty", false, "To Force fix DB dirty migration")
+	seed := flag.Bool("seed", false, "To run seed migration")
 	flag.Parse()
 
 	db.DatabaseConfig = db.Db{
@@ -28,7 +29,6 @@ func main() {
 
 	db.DbPool = db.DatabaseConfig.Connect()
 
-
 	if *migrate {
 		db.RunMigrations()
 		return
@@ -43,7 +43,10 @@ func main() {
 		db.ForceFixDirtyMigration()
 		return
 	}
-
+	if *seed {
+		db.RunSeedMigrations()
+		return
+	}
 
 	app.StartServer()
 }

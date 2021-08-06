@@ -7,6 +7,7 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/golang-migrate/migrate/v4/source/github"
 	_ "github.com/lib/pq"
+	"github.com/sujithps/ticket-booking-system/db/seed"
 
 	"strconv"
 )
@@ -17,7 +18,7 @@ const dbMigrationsPath = "file://db/migrations/"
 //TODO: Refactor Duplicate code
 
 func RunMigrations() {
-	fmt.Println("Running Migration on ", DbPool)
+	fmt.Println("Running Migration on ", DatabaseConfig.Name)
 
 	driver, err := postgres.WithInstance(DbPool, &postgres.Config{})
 	if err != nil {
@@ -44,7 +45,7 @@ func RunMigrations() {
 }
 
 func RollbackLatestMigration() {
-	fmt.Println("Running Rollback on ", DbPool)
+	fmt.Println("Running Rollback on ", DatabaseConfig.Name)
 
 	driver, err := postgres.WithInstance(DbPool, &postgres.Config{})
 	if err != nil {
@@ -71,9 +72,10 @@ func RollbackLatestMigration() {
 }
 
 func ForceFixDirtyMigration() {
-	fmt.Println("Force Fix Dirty migration ", DbPool)
+	fmt.Println("Force Fix Dirty migration ", DatabaseConfig.Name)
 
 	driver, err := postgres.WithInstance(DbPool, &postgres.Config{})
+
 	if err != nil {
 		fmt.Printf("Error : %+v \n", err)
 	}
@@ -89,10 +91,21 @@ func ForceFixDirtyMigration() {
 	if err != nil {
 		fmt.Printf("Error : %+v \n", err)
 	}
-	fmt.Println("Rollback: Current schema version ", strconv.FormatInt(int64(version), 10), " dirty: ", strconv.FormatBool(dirty))
+	fmt.Println("ForceFix Dirty version: Current schema version ", strconv.FormatInt(int64(version), 10), " dirty: ", strconv.FormatBool(dirty))
 	err = m.Force(int(version - 1))
 	if err != nil {
 		fmt.Printf("Error : %+v \n", err)
 	}
-	fmt.Println("Rollback SUCCESS")
+	fmt.Println("ForceFix Dirty version SUCCESS")
+}
+
+func RunSeedMigrations() {
+	fmt.Println("Running seed migration on", DatabaseConfig.Name)
+	for _, query := range seed.MIGRATIONS {
+		_, err := DbPool.Exec(query)
+		if err != nil {
+			fmt.Printf("Error : %+v \n", err)
+		}
+	}
+	fmt.Println("Seed migration SUCCESS")
 }
