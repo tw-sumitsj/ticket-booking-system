@@ -13,6 +13,9 @@ import (
 
 const dbMigrationsPath = "file://db/migrations/"
 
+//TODO: Accept `steps` from console to migrate / rollback / ForceFix
+//TODO: Refactor Duplicate code
+
 func RunMigrations() {
 	fmt.Println("Running Migration on ", DbPool)
 
