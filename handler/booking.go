@@ -11,7 +11,6 @@ import (
 
 func BookTicketHandler() func(context *gin.Context) {
 	return func(context *gin.Context) {
-		fmt.Println("Ticket Booked")
 		var bookingRequest contract.BookingRequest
 
 		if err := context.ShouldBindBodyWith(&bookingRequest, binding.JSON); err != nil {
@@ -24,10 +23,15 @@ func BookTicketHandler() func(context *gin.Context) {
 			return
 		}
 
-		ticket := model.Ticket{
-			Id:      0,
-			Catalog: bookingRequest.Catalog,
-			Slot:    bookingRequest.Slot,
+		ticket, err := model.CreateTicket(bookingRequest.Catalog, bookingRequest.Slot)
+		if err != nil {
+			fmt.Printf("Could not create ticket. %+v ", err)
+			context.JSON(http.StatusUnprocessableEntity, contract.BookingResponse{
+				Success: false,
+				Errors:  []string{err.Error()},
+				Data:    []model.Ticket{},
+			})
+			return
 		}
 
 		context.JSON(http.StatusCreated, contract.BookingResponse{
@@ -39,4 +43,3 @@ func BookTicketHandler() func(context *gin.Context) {
 		})
 	}
 }
-
