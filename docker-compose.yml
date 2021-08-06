@@ -8,7 +8,11 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - data:/var/lib/postgresql/data
+      - dbdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ticketbookingdb
+      POSTGRES_USER: ticketbookinguser
+      POSTGRES_PASSWORD: AToughPassword!
   server:
     build:
       context: .
@@ -18,7 +22,9 @@ services:
       - database
     networks:
       - default
+    volumes:
+      - ./db/migrations:/db/migrations
     ports:
       - "8080:8080"
 volumes:
-  data:
+  dbdata:

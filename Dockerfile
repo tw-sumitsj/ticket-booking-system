@@ -1,4 +1,4 @@
-FROM golang:1.116-alpine3.13 as builder
+FROM golang:1.16-alpine3.13 as builder
 COPY go.mod go.sum /go/src/github.com/sujithps/ticket-booking-system/
 WORKDIR /go/src/github.com/sujithps/ticket-booking-system
 RUN go mod download
