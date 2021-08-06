@@ -15,28 +15,11 @@ import (
 const dbMigrationsPath = "file://db/migrations/"
 
 //TODO: Accept `steps` from console to migrate / rollback / ForceFix
-//TODO: Refactor Duplicate code
 
 func RunMigrations() {
 	fmt.Println("Running Migration on ", DatabaseConfig.Name)
 
-	driver, err := postgres.WithInstance(DbPool, &postgres.Config{})
-	if err != nil {
-		fmt.Printf("Error : %+v \n", err)
-	}
-
-	fmt.Println("Got DB driver.")
-
-	m, err := migrate.NewWithDatabaseInstance(dbMigrationsPath, "postgres", driver)
-	if err != nil {
-		fmt.Printf("Error : %+v \n", err)
-	}
-	fmt.Println("Opened Migration Store.")
-	version, dirty, err := m.Version()
-	if err != nil {
-		fmt.Printf("Error : %+v \n", err)
-	}
-	fmt.Println("Migrating: Current schema version ", strconv.FormatInt(int64(version), 10), " dirty: ", strconv.FormatBool(dirty))
+	err, m, _ := connectDbForMigration()
 	err = m.Up()
 	if err != nil {
 		fmt.Printf("Error : %+v \n", err)
@@ -47,23 +30,8 @@ func RunMigrations() {
 func RollbackLatestMigration() {
 	fmt.Println("Running Rollback on ", DatabaseConfig.Name)
 
-	driver, err := postgres.WithInstance(DbPool, &postgres.Config{})
-	if err != nil {
-		fmt.Printf("Error : %+v \n", err)
-	}
+	err, m, _ := connectDbForMigration()
 
-	fmt.Println("Got DB driver.")
-
-	m, err := migrate.NewWithDatabaseInstance(dbMigrationsPath, "postgres", driver)
-	if err != nil {
-		fmt.Printf("Error : %+v \n", err)
-	}
-	fmt.Println("Opened Migration Store.")
-	version, dirty, err := m.Version()
-	if err != nil {
-		fmt.Printf("Error : %+v \n", err)
-	}
-	fmt.Println("Rollback: Current schema version ", strconv.FormatInt(int64(version), 10), " dirty: ", strconv.FormatBool(dirty))
 	err = m.Down()
 	if err != nil {
 		fmt.Printf("Error : %+v \n", err)
@@ -74,24 +42,8 @@ func RollbackLatestMigration() {
 func ForceFixDirtyMigration() {
 	fmt.Println("Force Fix Dirty migration ", DatabaseConfig.Name)
 
-	driver, err := postgres.WithInstance(DbPool, &postgres.Config{})
+	err, m, version := connectDbForMigration()
 
-	if err != nil {
-		fmt.Printf("Error : %+v \n", err)
-	}
-
-	fmt.Println("Got DB driver.")
-
-	m, err := migrate.NewWithDatabaseInstance(dbMigrationsPath, "postgres", driver)
-	if err != nil {
-		fmt.Printf("Error : %+v \n", err)
-	}
-	fmt.Println("Opened Migration Store.")
-	version, dirty, err := m.Version()
-	if err != nil {
-		fmt.Printf("Error : %+v \n", err)
-	}
-	fmt.Println("ForceFix Dirty version: Current schema version ", strconv.FormatInt(int64(version), 10), " dirty: ", strconv.FormatBool(dirty))
 	err = m.Force(int(version - 1))
 	if err != nil {
 		fmt.Printf("Error : %+v \n", err)
@@ -108,4 +60,25 @@ func RunSeedMigrations() {
 		}
 	}
 	fmt.Println("Seed migration SUCCESS")
+}
+
+func connectDbForMigration() (error, *migrate.Migrate, uint) {
+	driver, err := postgres.WithInstance(DbPool, &postgres.Config{})
+	if err != nil {
+		fmt.Printf("Error : %+v \n", err)
+	}
+
+	fmt.Println("Got DB driver.")
+
+	m, err := migrate.NewWithDatabaseInstance(dbMigrationsPath, "postgres", driver)
+	if err != nil {
+		fmt.Printf("Error : %+v \n", err)
+	}
+	fmt.Println("Opened Migration Store.")
+	version, dirty, err := m.Version()
+	if err != nil {
+		fmt.Printf("Error : %+v \n", err)
+	}
+	fmt.Println("Current schema version ", strconv.FormatInt(int64(version), 10), " dirty: ", strconv.FormatBool(dirty))
+	return err, m, version
 }

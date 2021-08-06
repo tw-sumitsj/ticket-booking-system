@@ -2,6 +2,7 @@ package db
 
 import (
 	"fmt"
+	"os"
 )
 import "database/sql"
 import _ "github.com/lib/pq"
@@ -33,7 +34,7 @@ func (db Db) SourceUrl() string {
 }
 
 func (db Db) Connect() (pool *sql.DB) {
-	pool, err := sql.Open("postgres", db.ConnectionUrl())
+	pool, err := sql.Open(os.Getenv("DATABASE_ADAPTER"), db.ConnectionUrl())
 	if err != nil {
 		fmt.Printf("Could not connect to database. Got error : %+v", err)
 	}
