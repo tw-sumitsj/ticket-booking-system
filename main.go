@@ -2,11 +2,11 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/sujithps/ticket-booking-system/app"
 	"github.com/sujithps/ticket-booking-system/db"
-	"os"
 )
 
 func main() {
@@ -16,22 +16,15 @@ func main() {
 	seed := flag.Bool("seed", false, "To run seed migration")
 	flag.Parse()
 
-	godotenv.Load()
-
-	db.DatabaseConfig = db.Db{
-		Name:     os.Getenv("DATABASE_NAME"),
-		User:     os.Getenv("DATABASE_USER"),
-		Password: os.Getenv("DATABASE_PASSWORD"),
-		Port:     os.Getenv("DATABASE_PORT"),
-		Host:     os.Getenv("DATABASE_HOST"),
-		Adapter:  os.Getenv("DATABASE_ADAPTER"),
-		Connection: db.Connection{
-			Max:  10,
-			Idle: 1,
-		},
+	err := godotenv.Load()
+	if err != nil {
+		fmt.Printf("Could not read env file %+v \n", err)
 	}
 
-	db.DbPool = db.DatabaseConfig.Connect()
+	db.Client = db.Setup()
+	db.Client.Connect()
+
+	defer db.Client.Close()
 
 	if *migrate {
 		db.RunMigrations()

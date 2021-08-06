@@ -17,7 +17,7 @@ const dbMigrationsPath = "file://db/migrations/"
 //TODO: Accept `steps` from console to migrate / rollback / ForceFix
 
 func RunMigrations() {
-	fmt.Println("Running Migration on ", DatabaseConfig.Name)
+	//fmt.Println("Running Migration on ", Client.DatabaseName)
 
 	err, m, _ := connectDbForMigration()
 	err = m.Up()
@@ -28,7 +28,7 @@ func RunMigrations() {
 }
 
 func RollbackLatestMigration() {
-	fmt.Println("Running Rollback on ", DatabaseConfig.Name)
+	//fmt.Println("Running Rollback on ", Client.DatabaseName)
 
 	err, m, _ := connectDbForMigration()
 
@@ -40,7 +40,7 @@ func RollbackLatestMigration() {
 }
 
 func ForceFixDirtyMigration() {
-	fmt.Println("Force Fix Dirty migration ", DatabaseConfig.Name)
+	//fmt.Println("Force Fix Dirty migration ", Client.DatabaseName)
 
 	err, m, version := connectDbForMigration()
 
@@ -52,9 +52,9 @@ func ForceFixDirtyMigration() {
 }
 
 func RunSeedMigrations() {
-	fmt.Println("Running seed migration on", DatabaseConfig.Name)
+	//fmt.Println("Running seed migration on", Client.DatabaseName)
 	for _, query := range seed.MIGRATIONS {
-		_, err := DbPool.Exec(query)
+		_, err := Client.Create(query)
 		if err != nil {
 			fmt.Printf("Error : %+v \n", err)
 		}
@@ -63,7 +63,7 @@ func RunSeedMigrations() {
 }
 
 func connectDbForMigration() (error, *migrate.Migrate, uint) {
-	driver, err := postgres.WithInstance(DbPool, &postgres.Config{})
+	driver, err := postgres.WithInstance(Client.GetPool(), &postgres.Config{})
 	if err != nil {
 		fmt.Printf("Error : %+v \n", err)
 	}

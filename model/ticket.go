@@ -11,7 +11,7 @@ type Ticket struct {
 	SlotId    int `json:"slot_id"`
 }
 
-var querySet = db.QuerySet{
+var TicketQuerySet = db.QuerySet{
 	SelectQuery: "SELECT slot_id, catalog_id FROM tickets WHERE id = $1 ;",
 	InsertQuery: "INSERT INTO tickets ( catalog_id, slot_id ) VALUES ( $1, $2 ) RETURNING id;",
 }
@@ -21,15 +21,8 @@ var querySet = db.QuerySet{
 func CreateTicket(catalog Catalog, slot Slot) (ticket Ticket, err error) {
 	fmt.Printf("Received catalog %+v and slot %+v \n", catalog, slot)
 
-	stmt, err := db.DbPool.Prepare(querySet.InsertQuery)
-	if err != nil {
-		fmt.Printf("Error %+v \n", err)
-		return
-	}
-	defer stmt.Close()
+	ticketId, err := db.Client.Create(TicketQuerySet.InsertQuery, catalog.Id, slot.Id)
 
-	var ticketId int
-	err = stmt.QueryRow(catalog.Id, slot.Id).Scan(&ticketId)
 	if err != nil {
 		fmt.Printf("Error %+v \n", err)
 		return
@@ -47,7 +40,7 @@ func CreateTicket(catalog Catalog, slot Slot) (ticket Ticket, err error) {
 func Load(id int) (ticket Ticket, err error) {
 	ticket = Ticket{Id: id}
 
-	err = db.DbPool.QueryRow(querySet.SelectQuery, id).Scan(&ticket.SlotId, &ticket.CatalogId)
+	err = db.Client.Read(TicketQuerySet.SelectQuery, id, &ticket.CatalogId, &ticket.SlotId)
 
 	if err != nil {
 		fmt.Println(err)
