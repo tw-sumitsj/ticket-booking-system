@@ -3,6 +3,7 @@ package app
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/sujithps/ticket-booking-system/handler"
+	"github.com/sujithps/ticket-booking-system/middleware"
 )
 
 type Router struct {
@@ -13,15 +14,10 @@ func CreateRouter() *Router {
 	r := &Router{gin.Default()}
 	r.addRoutes()
 
-	authRoute := r.Group("/admin", AuthMiddleware)
+	authRoute := r.Group("/admin", middleware.AuthMiddleware)
 	authRoute.POST("/user", handler.UserHandler())
 
 	return r
-}
-
-func AuthMiddleware(c *gin.Context) {
-	//TODO: Read user credentials. Validate. Create session. Set session.
-	c.Set("SESSION", "SECRET@SESSION@ID")
 }
 
 func (r Router) addRoutes() {
