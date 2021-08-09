@@ -12,11 +12,11 @@ type Router struct {
 
 func CreateRouter() *Router {
 	r := &Router{gin.Default()}
+	r.Use(middleware.LoggingMiddleWare)
 	r.addRoutes()
 
 	authRoute := r.Group("/admin", middleware.AuthMiddleware)
 	authRoute.POST("/user", handler.UserHandler())
-
 	return r
 }
 
