@@ -2,8 +2,8 @@ package main
 
 import (
 	"flag"
-	"github.com/sujithps/ticket-booking-system/app"
-	"github.com/sujithps/ticket-booking-system/db"
+	"github.com/tw-sumitsj/ticket-booking-system/app"
+	"github.com/tw-sumitsj/ticket-booking-system/db"
 )
 
 func main() {

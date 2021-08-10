@@ -2,20 +2,50 @@ package app
 
 import (
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"net/http"
+	"time"
 )
 
 func StartServer() {
-	if err := http.ListenAndServe(":8080", pingHandler()); err != nil && err != http.ErrServerClosed {
-		fmt.Errorf("something went wrong %s", err)
-		fmt.Println("Server Not Started")
-		return
-	}
+	router := gin.Default()
+	registerRoutes(router)
+	router.Run()
 	fmt.Println("Server Started")
 }
 
-func pingHandler() http.HandlerFunc {
-	return func(writer http.ResponseWriter, request *http.Request) {
-		writer.WriteHeader(http.StatusOK)
+func registerRoutes(router *gin.Engine) {
+	registerPingRoute(router)
+	registerBookRoute(router)
+}
+
+func registerPingRoute(router *gin.Engine) {
+	router.GET("/ping", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "Ping Successful",
+		})
+	})
+}
+
+func registerBookRoute(router *gin.Engine) {
+	response := Ticket{
+		Id: 0,
+		Catalog: Catalog{
+			Id:   0,
+			Name: "Movie1",
+		},
+		Slot: Slot{
+			Id:   0,
+			Date: time.Now(),
+		},
 	}
+	errors := []string{}
+
+	router.POST("/book", func(c *gin.Context) {
+		c.JSON(http.StatusCreated, gin.H{
+			"success": true,
+			"errors": errors,
+			"data": response,
+		})
+	})
 }
