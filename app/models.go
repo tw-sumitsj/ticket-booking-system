@@ -17,3 +17,8 @@ type Ticket struct {
 	Catalog Catalog
 	Slot    Slot
 }
+
+type TicketRequest struct{
+	Catalog Catalog
+	Slot Slot
+}

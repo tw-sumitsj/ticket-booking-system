@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"math/rand"
 	"net/http"
 	"time"
 )
@@ -28,20 +29,25 @@ func registerPingRoute(router *gin.Engine) {
 }
 
 func registerBookRoute(router *gin.Engine) {
-	response := Ticket{
-		Id: 0,
-		Catalog: Catalog{
-			Id:   0,
-			Name: "Movie1",
-		},
-		Slot: Slot{
-			Id:   0,
-			Date: time.Now(),
-		},
-	}
 	errors := []string{}
 
 	router.POST("/book", func(c *gin.Context) {
+		var request TicketRequest
+		r := rand.New(rand.NewSource(time.Now().UnixNano()))
+
+		if error := c.BindJSON(&request); error!= nil {
+			c.JSON(http.StatusBadRequest,gin.H{
+				"message":"Invalid data!",
+			})
+			return
+		}
+
+		response := Ticket{
+			Id: r.Int(),
+			Catalog: request.Catalog,
+			Slot: request.Slot,
+		}
+
 		c.JSON(http.StatusCreated, gin.H{
 			"success": true,
 			"errors": errors,
